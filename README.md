@@ -1,20 +1,26 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AI Co-Founder 🤖
 
-# Run and deploy your AI Studio app
+**An AI-powered virtual co-founder to help solo founders and small teams generate ideas, plan MVPs, and validate concepts with actionable guidance.**
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/ba8db9ed-072b-4153-a0f9-507e0effed9e
+## Overview
+AI Co-Founder acts as a smart brainstorming partner, market research assistant, and project planning guide. It’s designed to help founders **build smarter, faster, and with confidence** by leveraging AI.
 
-## Run Locally
+---
 
-**Prerequisites:**  Node.js
+## Key Features
+- 💡 **Idea Generation** – Generate innovative startup or product ideas based on your inputs.  
+- 📊 **Market Research** – Conduct competitor analysis and explore market trends.  
+- 🛠 **MVP Planning** – Suggest tools, workflows, and step-by-step execution strategies.  
+- 🚀 **Actionable Guidance** – Get structured, actionable advice to accelerate product development.  
 
+---
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Who It’s For
+- Solo founders  
+- Early-stage entrepreneurs  
+- Small teams looking to **accelerate idea validation and MVP development** using AI  
+
+---
+
