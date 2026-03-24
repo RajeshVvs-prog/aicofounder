@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --color-yc: #FF6600;
+  --color-yc-light: #FFF0E6;
+  --color-yc-dark: #CC5200;
+  --color-yc-mid: #FF9966;
+  --color-pale: #FDFCFB;
+  --color-ink: #1A1A1A;
+  --color-surface: #FFFFFF;
+  --color-warm-gray: #666666;
+  --color-border: #E5E5E5;
+}
+
+@layer base {
+  body {
+    @apply antialiased bg-pale text-ink font-sans;
+  }
+}
+
+@layer components {
+  .btn-sm-yc {
+    @apply px-4 py-2 bg-yc text-white font-bold rounded-lg hover:bg-yc-dark transition-all text-sm;
+  }
+  .btn-sm-ghost {
+    @apply px-4 py-2 text-warm-gray font-bold hover:text-ink transition-all text-sm;
+  }
+  .btn-hero {
+    @apply px-8 py-4 bg-yc text-white font-bold rounded-xl hover:bg-yc-dark transition-all flex items-center gap-2 shadow-lg shadow-yc/20;
+  }
+  .hero-kicker {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-yc-light text-yc font-bold text-xs rounded-full mb-6 uppercase tracking-widest;
+  }
+  .kicker-dot {
+    @apply w-2 h-2 bg-yc rounded-full animate-pulse;
+  }
+  .hero-h1 {
+    @apply text-6xl font-black text-ink leading-[1.1] tracking-tight;
+  }
+  .nav-logo {
+    @apply flex items-center gap-3 text-xl font-serif font-black italic tracking-tighter text-ink;
+  }
+  .nav-logo-badge {
+    @apply ml-1 px-2 py-0.5 bg-yc text-white text-[9px] font-black rounded-full uppercase tracking-widest shadow-sm shadow-yc/20;
+  }
+  .hero-card {
+    @apply bg-ink rounded-[32px] p-8 shadow-2xl border border-white/10;
+  }
+  .hcard-header {
+    @apply flex items-center gap-1.5 mb-8 border-b border-white/10 pb-4;
+  }
+  .hcard-dot {
+    @apply w-2.5 h-2.5 rounded-full;
+  }
+  .hcard-body {
+    @apply space-y-6;
+  }
+  .hcard-label {
+    @apply text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2;
+  }
+  .hcard-idea {
+    @apply text-xl font-bold text-white leading-relaxed mb-8;
+  }
+  .score-bar-wrap {
+    @apply w-full h-2 bg-white/10 rounded-full overflow-hidden;
+  }
+  .score-bar {
+    @apply h-full bg-yc rounded-full;
+  }
+  .prose-yc {
+    h1, h2, h3, h4, h5, h6 { @apply text-yc font-bold; }
+    a { @apply text-yc underline hover:text-yc-dark; }
+    strong { @apply text-yc font-bold; }
+  }
+  .bg-surface {
+    @apply bg-white;
+  }
+  .border-border {
+    @apply border-gray-200;
+  }
+  .card-num {
+    @apply absolute -top-5 -left-5 w-16 h-16 bg-yc text-white font-serif font-black italic rounded-3xl flex items-center justify-center text-3xl shadow-2xl shadow-yc/40 rotate-[-12deg] transition-all z-20 border-[6px] border-white group-hover:rotate-0 group-hover:scale-110;
+  }
+  .result-card {
+    @apply relative bg-white border border-border rounded-[32px] p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all;
+  }
+  .score-badge {
+    @apply flex items-center gap-2 px-3 py-1.5 bg-yc-light text-yc font-black text-xs rounded-full uppercase tracking-widest;
+  }
+  .pillar-card {
+    @apply relative bg-white border border-border rounded-[32px] p-10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all;
+  }
+  .pillar-num {
+    @apply absolute top-8 right-8 text-6xl font-serif font-black text-yc/5 italic select-none;
+  }
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+}
+
+#cursor {
+  @apply fixed w-4 h-4 bg-yc rounded-full pointer-events-none z-[9999] transition-transform duration-300 ease-out hidden lg:block;
+}
+#cursor-ring {
+  @apply fixed w-10 h-10 border-2 border-yc/30 rounded-full pointer-events-none z-[9998] transition-all duration-500 ease-out hidden lg:block;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
