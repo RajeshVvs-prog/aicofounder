@@ -1,13 +1,15 @@
+// File: /app/api/validate/route.ts (or pages/api/validate.ts for Next.js)
 import { GoogleGenAI, Type } from "@google/genai";
 
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+  apiKey: process.env.GEMINI_API_KEY, // MUST be set in Vercel
 });
 
 export async function POST(req: Request) {
   try {
     const { idea } = await req.json();
 
+    // Call Google AI
     const response = await ai.models.generateContent({
       model: "gemini-1.5-pro",
       contents: [
@@ -69,14 +71,28 @@ Return output in JSON format exactly as specified.`
       }
     });
 
-    if (!response.text) {
-      return Response.json({ error: "No response text" }, { status: 500 });
+    // Log the raw response for debugging
+    console.log("AI Response Raw:", response);
+
+    // Some AI responses may have .text or .output[0].content[0].text
+    const rawText = response.text || response.output?.[0]?.content?.[0]?.text;
+    if (!rawText) {
+      return Response.json({ error: "No response from AI" }, { status: 500 });
     }
 
-    return Response.json(JSON.parse(response.text));
+    // Parse JSON safely
+    let result;
+    try {
+      result = JSON.parse(rawText);
+    } catch (err) {
+      console.error("JSON parse error:", err, rawText);
+      return Response.json({ error: "Failed to parse AI response" }, { status: 500 });
+    }
+
+    return Response.json(result);
 
   } catch (error) {
-    console.error(error);
+    console.error("Server error:", error);
     return Response.json({ error: "Server error" }, { status: 500 });
   }
 }
