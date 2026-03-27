@@ -1,9 +1,10 @@
-const Groq = require("groq-sdk");
+import Groq from "groq-sdk";
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
   });
+
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -63,4 +64,4 @@ Return ONLY valid JSON in this format:
       details: error.message 
     });
   }
-};
+}
