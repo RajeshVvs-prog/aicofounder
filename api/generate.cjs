@@ -1,10 +1,9 @@
 const Groq = require("groq-sdk");
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
 module.exports = async (req, res) => {
+  const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,32 +20,34 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { idea } = req.body;
+    const { field, problemType, targetUsers } = req.body;
 
     const completion = await groq.chat.completions.create({
       messages: [
         {
           role: "user",
-          content: `Provide comprehensive market research for this startup idea:
-${idea}
+          content: `Generate 3 innovative startup ideas based on:
+Field: ${field}
+Problem Type: ${problemType}
+Target Users: ${targetUsers}
 
 Return ONLY valid JSON in this format:
 {
-  "cards": [
-    {"title": "Market Overview", "points": ["Point 1", "Point 2", "Point 3"], "score": 85},
-    {"title": "Target Audience", "points": ["Point 1", "Point 2", "Point 3"], "score": 80},
-    {"title": "Competitors", "points": ["Point 1", "Point 2", "Point 3"], "score": 75},
-    {"title": "Opportunities", "points": ["Point 1", "Point 2", "Point 3"], "score": 90},
-    {"title": "Risks", "points": ["Point 1", "Point 2", "Point 3"], "score": 70},
-    {"title": "Go-to-Market", "points": ["Point 1", "Point 2", "Point 3"], "score": 85}
-  ],
-  "overall_score": 80,
-  "recommendation": "Overall recommendation"
+  "ideas": [
+    {
+      "title": "Idea name",
+      "description": "Brief description",
+      "target_audience": "Who it's for",
+      "unique_value": "What makes it unique",
+      "score": 85,
+      "emoji": "💡"
+    }
+  ]
 }`
         }
       ],
       model: "llama-3.3-70b-versatile",
-      temperature: 0.7,
+      temperature: 0.8,
       response_format: { type: "json_object" }
     });
 
@@ -54,7 +55,12 @@ Return ONLY valid JSON in this format:
     res.status(200).json(result);
 
   } catch (error) {
-    console.error("Market error:", error.message);
-    res.status(500).json({ error: "An error occurred. Please try again." });
+    console.error("Generate error:", error.message);
+    console.error("Stack:", error.stack);
+    console.error("API Key exists:", !!process.env.GROQ_API_KEY);
+    res.status(500).json({ 
+      error: "An error occurred. Please try again.",
+      details: error.message 
+    });
   }
 };

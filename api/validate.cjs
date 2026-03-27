@@ -1,10 +1,9 @@
 const Groq = require("groq-sdk");
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
 module.exports = async (req, res) => {
+  const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
