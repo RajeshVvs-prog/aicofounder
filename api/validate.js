@@ -17,6 +17,10 @@ export default async function handler(req, res) {
   try {
     const { idea } = req.body;
 
+    console.log('API Key exists:', !!process.env.GROQ_API_KEY);
+    console.log('API Key length:', process.env.GROQ_API_KEY?.length);
+    console.log('API Key starts with:', process.env.GROQ_API_KEY?.substring(0, 4));
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
