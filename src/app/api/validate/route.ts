@@ -1,15 +1,27 @@
-// File: /app/api/validate/route.ts (or pages/api/validate.ts for Next.js)
 import { GoogleGenAI, Type } from "@google/genai";
+import { validateIdea, sanitizeInput } from "@/src/lib/validation";
 
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY, // MUST be set in Vercel
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 export async function POST(req: Request) {
   try {
-    const { idea } = await req.json();
+    const body = await req.json();
+    const { idea } = body;
 
-    // Call Google AI
+    // Validate input
+    const validation = validateIdea(idea);
+    if (!validation.valid) {
+      return Response.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize input
+    const sanitizedIdea = sanitizeInput(idea);
+
     const response = await ai.models.generateContent({
       model: "gemini-1.5-pro",
       contents: [
@@ -19,28 +31,69 @@ export async function POST(req: Request) {
             {
               text: `You are an expert startup co-founder, product strategist, and investor.
 Your task is to deeply analyze a startup idea and provide a thorough, structured evaluation as if you are deciding whether to invest time and money into it.
+
 Do NOT give generic or surface-level answers. Think critically, deeply, and realistically.
 Be honest and slightly critical, not overly positive. Avoid generic statements.
 Depth is more important than length.
 
 Startup Idea:
-${idea}
+${sanitizedIdea}
 
 ---
 Provide your response in the following sections:
 
 1. Problem Clarity (Score /10)
+   - What exact problem is being solved?
+   - Is this a real and meaningful problem?
+   - Who experiences this problem most?
+
 2. Target Users & Need Strength (Score /10)
+   - Who are the primary users?
+   - How badly do they need this solution?
+   - Is this a must-have or nice-to-have?
+
 3. Market Opportunity (Score /10)
+   - Is this a growing, stable, or declining space?
+   - Approximate scale (large market, niche, etc.)
+
 4. Competitive Landscape (Score /10)
+   - Who are the main competitors?
+   - How is this different?
+   - Is the market too crowded?
+
 5. Unique Value Proposition (UVP) (Score /10)
+   - What is the "unfair advantage"?
+   - Why would users switch?
+
 6. Feasibility & Execution (Score /10)
+   - How hard is this to build?
+   - Key technical or operational challenges?
+
 7. Monetization Potential (Score /10)
+   - How will this make money?
+   - Is it sustainable?
+
 8. Risks & Challenges (Score /10)
+   - What could kill this in 6 months?
+
 9. Improvements (Score /10)
+   - 2–3 ways to make this 10x better
 
 ---
-Return output in JSON format exactly as specified.`
+Return output STRICTLY in JSON:
+
+{
+  "slides": [
+    {
+      "title": "Problem Clarity",
+      "score": 0,
+      "content": ""
+    }
+  ],
+  "final_score": 0,
+  "verdict": "",
+  "final_opinion": ""
+}`
             }
           ]
         }
@@ -71,28 +124,33 @@ Return output in JSON format exactly as specified.`
       }
     });
 
-    // Log the raw response for debugging
-    console.log("AI Response Raw:", response);
+    const rawText = response.text;
 
-    // Some AI responses may have .text or .output[0].content[0].text
-    const rawText = response.text || response.output?.[0]?.content?.[0]?.text;
     if (!rawText) {
-      return Response.json({ error: "No response from AI" }, { status: 500 });
+      return Response.json(
+        { error: "No response from AI" },
+        { status: 500 }
+      );
     }
 
-    // Parse JSON safely
     let result;
     try {
       result = JSON.parse(rawText);
     } catch (err) {
-      console.error("JSON parse error:", err, rawText);
-      return Response.json({ error: "Failed to parse AI response" }, { status: 500 });
+      console.error("Parse error:", err);
+      return Response.json(
+        { error: "Invalid response format" },
+        { status: 500 }
+      );
     }
 
     return Response.json(result);
 
   } catch (error) {
     console.error("Server error:", error);
-    return Response.json({ error: "Server error" }, { status: 500 });
+    return Response.json(
+      { error: "An error occurred. Please try again." },
+      { status: 500 }
+    );
   }
 }

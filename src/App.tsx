@@ -1,4 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
 import { useState, useEffect, Component, ErrorInfo, ReactNode } from "react";
 import Markdown from "react-markdown";
 import { 
@@ -460,33 +459,30 @@ function MainApp() {
 
     setLoading(true);
 
-    const instructions = {
-      validate: VALIDATION_INSTRUCTION,
-      market: MARKET_RESEARCH_INSTRUCTION,
-      execution: EXECUTION_PLAN_INSTRUCTION
+    const endpoints = {
+      validate: "/api/validate",
+      market: "/api/market",
+      execution: "/api/execution"
     };
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Idea: ${idea}`,
-        config: {
-          systemInstruction: instructions[step],
-          responseMimeType: "application/json",
+      const response = await fetch(endpoints[step], {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ idea }),
       });
 
-      const text = result.text || "";
-      try {
-        const json = JSON.parse(text);
-        setResults(prev => ({ ...prev, [step]: json }));
-      } catch (e) {
-        console.error(`Failed to parse ${step} JSON`, e);
-        setResults(prev => ({ ...prev, [step]: "Error parsing analysis results. Please try again." }));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Request failed");
       }
+
+      const json = await response.json();
+      setResults(prev => ({ ...prev, [step]: json }));
     } catch (error) {
-      console.error("Error generating analysis:", error);
+      console.error(`Error generating ${step} analysis:`, error);
       setResults(prev => ({ ...prev, [step]: "Sorry, something went wrong. Please try again." }));
     } finally {
       setLoading(false);
@@ -501,25 +497,25 @@ function MainApp() {
     setGeneratedIdeas(null);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-      const prompt = `Field: ${genFields.field}\nProblem Type: ${genFields.problemType}\nTarget Users: ${genFields.targetUsers}`;
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: IDEA_GEN_INSTRUCTION,
-          responseMimeType: "application/json",
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          field: genFields.field,
+          problemType: genFields.problemType,
+          targetUsers: genFields.targetUsers,
+        }),
       });
 
-      const text = result.text || "";
-      try {
-        const json = JSON.parse(text);
-        setGeneratedIdeas(json);
-      } catch (e) {
-        console.error("Failed to parse ideas JSON", e);
-        setGeneratedIdeas("Error generating ideas. Please try again.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Request failed");
       }
+
+      const json = await response.json();
+      setGeneratedIdeas(json);
     } catch (error) {
       console.error("Error generating ideas:", error);
       setGeneratedIdeas("Sorry, something went wrong. Please try again.");

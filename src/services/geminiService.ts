@@ -1,4 +1,4 @@
-import { EvaluationResult } from "../types";
+import { EvaluationResult } from './types';
 
 export async function validateStartupIdea(idea: string): Promise<EvaluationResult> {
   const res = await fetch("/api/validate", {
