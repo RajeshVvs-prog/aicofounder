@@ -1,10 +1,4 @@
-import Groq from "groq-sdk";
-
 export default async function handler(req, res) {
-  const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-  });
-
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,11 +17,18 @@ export default async function handler(req, res) {
   try {
     const { field, problemType, targetUsers } = req.body;
 
-    const completion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: `Generate 3 innovative startup ideas based on:
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'user',
+            content: `Generate 3 innovative startup ideas based on:
 Field: ${field}
 Problem Type: ${problemType}
 Target Users: ${targetUsers}
@@ -45,23 +46,23 @@ Return ONLY valid JSON in this format:
     }
   ]
 }`
-        }
-      ],
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.8,
-      response_format: { type: "json_object" }
+          }
+        ],
+        temperature: 0.8,
+        response_format: { type: 'json_object' }
+      })
     });
 
-    const result = JSON.parse(completion.choices[0].message.content);
+    if (!response.ok) {
+      throw new Error(`Groq API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const result = JSON.parse(data.choices[0].message.content);
     res.status(200).json(result);
 
   } catch (error) {
-    console.error("Generate error:", error.message);
-    console.error("Stack:", error.stack);
-    console.error("API Key exists:", !!process.env.GROQ_API_KEY);
-    res.status(500).json({ 
-      error: "An error occurred. Please try again.",
-      details: error.message 
-    });
+    console.error('Generate error:', error.message);
+    res.status(500).json({ error: 'An error occurred. Please try again.', details: error.message });
   }
 }
